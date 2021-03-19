@@ -72,3 +72,69 @@ mean(toyota$cty)
 ##      합니다. 이 회사들의 데이터를 추출한 후 hwy 전체 평균을 구하세요.
 makers <- mpg %>% filter(manufacturer %in% c("chevrolet", "ford", "honda"))
 mean(makers$hwy)
+
+#필요한 변수만 추출하기
+# select()는 데이터에 들어 있는 수많은 변수 중 일부만 추출해
+# 활용하고자 할 때 사용합니다~!
+
+exam %>% select(math) ## math 추출
+exam %>% select(english) ## english 추출
+
+##여러 변수 추출하기(쉼표를 넣어 변수명을 나열해보자)
+exam %>% select(class, math, english)
+
+##변수 제외하기
+exam %>% select(-math, -english)
+
+#dplyr 함수 조합하기
+
+## filter()와 select() 조합하기
+### class가 1인 행만 추출한 다음 english 추출
+exam %>% filter(class==1) %>% select(english)
+
+##가독성 있게 줄 바꾸기
+exam %>%
+  filter(class==1) %>% ### class가 1인 행 추출
+  select(english) ### english 추출
+
+##일부만 출력하기
+exam %>% 
+  select(id, math) %>% 
+  head ###괄호 없이 head만 쓰면 6행까지 출력된당
+
+exam %>%
+  select(id, math) %>% ### id, math 추출
+  head(10) ### 앞부분 10행까지 추출
+
+#혼자서 해보기(mpg 데이터를 이용한)
+## Q1. mpg 데이터는 11개 변수로 구성되어 있다. 이 중 일부만 추출해 분석에 활용
+##      하고자 함. mpg 데이터 중 class, cty 변수를 추출해 새로운 데이터를 
+##      만드시오. 새로 만든 데이터의 일부를 출력해 두 변수로만 구성되어 있는지
+##      확인하세요.
+classcty <- mpg %>%
+              select(class, cty)
+head(classcty,10)
+
+## Q2. 자동차 종류에 따라 도시 연비가 다른지 알아보고자 합니다.
+##      앞에서 추출한 데이터를 이용해 class가 "suv"인 자동차와 "compact"인
+##      자동차 중 어떤 자동차의 cty 평균이 더 높은지 구하세요.
+suv <- classcty %>% filter(class=="suv")
+compact <- classcty %>% filter(class=="compact")
+mean(suv$cty)
+mean(compact$cty)
+
+#순서대로 정렬하기(arrange 함수를 이용한)
+exam %>% arrange(math)
+##내림차순 정렬
+exam %>% arrange(desc(math))
+### 정렬 기준으로 삼을 변수를 여러 개 지정하려면? 쉼표를 이용해 변수명 나열
+### 밑 코드는 반으로 오름차순 정렬 후 각 반에서 수학점수 기준으로 오름차순 정렬
+exam %>% arrange(class, math)
+
+# mpg 데이터를 이용한 분석 문제 해결
+## Q1. "audi"에서 생산한 자동차 중 어떤 자동차 모델의 hwy가 높은지 알아보려고 한다.
+##      "audi"에서 생산한 자동차 중 hwy가 1~5위에 해당하는 자동차의 데이터를 출력하시오.
+audi <- mpg %>% filter(manufacturer=="audi")
+audi %>% arrange(desc(hwy)) %>% head(5)
+
+#파생변수 추가하기
