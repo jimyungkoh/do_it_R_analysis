@@ -137,4 +137,92 @@ exam %>% arrange(class, math)
 audi <- mpg %>% filter(manufacturer=="audi")
 audi %>% arrange(desc(hwy)) %>% head(5)
 
-#파생변수 추가하기
+#파생변수 추가하기(mutate 함수를 사용한다)
+exam %>%
+  mutate(total=math+english+science) %>%
+  head
+##여러 파생변수 한번에 추가하기
+exam %>%
+  mutate(total=math+english+science,
+         mean=(math+english+science)/3) %>%
+  head
+## mutate()에 ifelse() 적용하기
+exam %>%
+  mutate(test =ifelse(science>=60, "pass", "fail")) %>%
+  head
+##추가한 변수를 dplyr 코드에 바로 활용하기
+exam %>%
+  mutate(total=math+english+science) %>% ###total 변수 추가
+  arrange(total) %>% ### total 변수 기준 정렬
+  head ### 일부 추출
+
+#mpg 데이터를 이용해 분석 문제 해결하기
+## Q1. mpg() 데이터 복사본을 만들고, cty, hwy를 더한 합산 연비 변수를 추가하세요.
+mpg <- as.data.frame(mpg)
+mpg <- mpg %>% mutate(totalfe=cty+hwy)
+
+##앞에서 만든 '합산 연비 변수'를 2로 나눠 '평균 연비 변수'를 추가하세요.
+mpg <- mpg %>% mutate(meanfe=totalfe/2)
+mpg
+
+##'평균 연비 변수'가 가장 높은 자동차 3종의 데이터를 출력하세요.
+mpg %>% arrange(desc(meanfe)) %>% head(3)
+
+##1~3번 문제를 해결할 수 있는 하나로 연결된 dplyr 구문을 만들어 실행해 보세요.
+##데이터는 복사본 대신 mpg 원본을 이용하세요.
+mpg %>%
+  mutate(totalfe=cty+hwy, meanfe=totalfe/2) %>%
+  arrange(desc(meanfe)) %>%
+  head(3)
+
+#집단별로 요약하기[group_by()와 summarise()를 이용한]
+exam %>% summarise(mean_math=mean(math)) ##math 평균 산출
+##  summarise()는 전체를 요약한 값보다는 group_by()와 조합해 집단별 요약표를
+##  만들 때 사용합니다.
+
+exam %>%
+  group_by(class) %>% # class별로 분리
+  summarise(mean_math=mean(math)) # math 평균 산출
+
+#여러 요약 통계량 한번에 산출하기
+exam %>%
+  group_by(class) %>% # class 별로 분리
+  summarise(mean_math=mean(math), # math 평균
+            sum_math=sum(math), # math 합계
+            median_math=median(math), # math 중앙값
+            n=n()) # 학생 수
+##n()은 데이터가 몇 행으로 되어 있는지 '빈도'를 구하는 기능
+
+#dplyr 조합하기(dplyr 패키지는 함수를 조합할 때 진가를 발휘함)
+mpg %>%
+  group_by(manufacturer) %>% # 회사별로 분리
+  filter(class == "suv") %>% # suv 추출
+  mutate(tot=(cty+hwy)/2) %>% # 통합 연비 변수 생성
+  summarise(mean_tot=mean(tot)) %>% #통합 연비 평균 산출
+  arrange(desc(mean_tot)) %>%
+  head(5) # 1~5위까지 출력
+
+#mpg 데이터를 이용해 분석 문제를 해결해 보세요.
+## Q1. mpg 데이터의 class는 "suv", "compact" 등 자동차를 특징에 따라 일곱 종류로 분류한 변수입니다. 어떤 차종의 도시 연비가 높은지 비교해 보려고 합니다. class별 cty 평균을 구해 보세요.
+mpg %>%
+  group_by(class) %>%
+  summarise(mean_cty=mean(cty)) %>%
+  arrange(desc(mean_cty))
+## Q2. 어떤 회사 자동차의 hwy가 가장 높은지 알아보려고 합니다. hwy 평균이 가장 높은 회사 세 곳을 출력하세요.
+mpg %>%
+  group_by(manufacturer) %>%
+  summarise(mean_hwy=mean(hwy)) %>%
+  arrange(desc(mean_hwy)) %>%
+  head(3)
+## Q3. 어떤 회사에서 "compact"(경차) 차종을 가장 많이 생산하는지 알아보려고 합니다. 각 회사별 "compact" 차종 수를 내림차순으로 정렬해 출력하세요.
+mpg %>%
+  group_by(manufacturer) %>%
+  filter(class=="compact") %>%
+  summarise(compact=n())%>%
+  arrange(desc(compact))
+### 답안
+### mpg %>%
+###     filter(class=="compact") %>%
+###     group_by(manufacturer) %>%
+###     summarise(count=n()) %>%
+###     arrange(desc(count))
