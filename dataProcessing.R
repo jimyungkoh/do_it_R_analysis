@@ -226,3 +226,57 @@ mpg %>%
 ###     group_by(manufacturer) %>%
 ###     summarise(count=n()) %>%
 ###     arrange(desc(count))
+
+#데이터 합치기
+##가로로 합치기
+###중간고사 데이터 생성
+test1 <- data.frame(id=c(1,2,3,4,5),
+                    midterm=c(60,80,70,90,85))
+###기말고사 데이터 생성
+test2 <- data.frame(id=c(1,2,3,4,5),
+                    final=c(70,83,65,95,80))
+test1
+test2
+### dplyr 패키지의 left_join()을 이용하면 데이터를 가로로 합칠 수 있다!
+### by에 기준 변수를 지정할 때 변수명 앞뒤에 따옴표를 입력해야 한다.
+total <- left_join(test1, test2, by="id")
+total
+
+##다른 데이터를 활용해 변수 추가하기
+###left_join()을 응용하면 특정 변수의 값을 기준으로 다른 데이터의 값을 추가할 수 있다.
+### 예를 들어, 지역 번호가 들어있는 데이터를 분석할 경우, 어떤 지역인지 알 수 있도록 지역 이름을 추가해야 할 때가 있는데, 지역 번호별 지역 이름을 나타낸 데이터가 있다면 분석 중인 데이터에 지역 이름을 추가할 수 있다.
+
+name <- data.frame(class=c(1,2,3,4,5),
+                   teacher=c("안젤리나 졸리", "앤 해서웨이", "엠버 허드", "한효주", "권은비"))
+name
+
+exam_new <- left_join(exam, name, by="class")
+exam_new
+
+##세로로 합치기[bind_rows()를 이용한]
+### 학생 1~5번 시험 데이터 생성
+group_a <-data_frame(id=c(1,2,3,4,5),
+                     test=c(60,80,70,90,85))
+### 학생 6~10번 시험 데이터 생성
+group_b <- data_frame(id=c(6,7,8,9,10),
+                      test=c(70,83,65,95,80))
+group_a; group_b
+
+group_all <- bind_rows(group_a,group_b)
+group_all
+
+#혼자서 해보기: mpg 데이터를 이용해 분석 문제를 해결해 보세요(156~157pp)
+
+fuel <- data.frame(fl=c("c","d","e","p","r"),
+                   price_fl=c(2.35,2.38,2.11,2.76,2.22),
+                   stringsAsFactors = F)
+##stringsAsFactors=F 는 문자를 Factor 타입으로 변환하지 않도록 설정하는 파라미터임. data.frame()은 변수에 문자가 들어 있으면 factor 타입으로 변환하도록 기본 설정되어 있고, fl을 mpg 데이터와 동일하게 문자 타입(chr)으로 만들어야 분석 작업에서 오류가 발생하지 않기 때문에 이 파라미터를 성정한 것임.
+
+## Q1. mpg 데이터에는 연료 종류를 나타낸 fl 변수는 있지만 연료 가격을 나타낸 변수는 없다. 위에서 만든 fuel 데이터를 이용해 mpg 데이터에 price_fl 변수를 추가하시오.
+
+mpg <- left_join(mpg, fuel, by="fl")
+mpg
+
+## Q2. 연료 가격 변수가 잘 추가됐는지 확인하기 위해 model, fl, price_fl 변수를 추출해 앞부분 5행을 출력해보세요.
+
+mpg %>% select(model, fl, price_fl) %>% head(5)
