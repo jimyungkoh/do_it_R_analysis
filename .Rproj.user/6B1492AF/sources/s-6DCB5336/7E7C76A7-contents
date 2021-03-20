@@ -1,3 +1,4 @@
+library(ggplot2)
 # 데이터 전처리 - 원하는 형태로 데이터 가공하기
 ## dplyr  함수를 이용해 데이터를 가공하는 방법
 ## filter(): 행 추출 | select(): 열(변수) 추출 | arranger(): 정렬
@@ -280,3 +281,39 @@ mpg
 ## Q2. 연료 가격 변수가 잘 추가됐는지 확인하기 위해 model, fl, price_fl 변수를 추출해 앞부분 5행을 출력해보세요.
 
 mpg %>% select(model, fl, price_fl) %>% head(5)
+
+#분석 도전!
+#미국 동북중부 427개 지역의 인구통계 정보를 담고 있는 midwest 데이터를 사용해 데이터 분석 문제를 해결해 보세요. midwest는 ggplot2 패키지에 들어 있습니다.
+midwest <- as.data.frame(ggplot2::midwest)
+##문제 1. popadults는 해당 지역의 성인 인구, poptotal은 전체 인구를 나타냅니다. midwest 데이터에 '전체 인구 대비 미성년 인구 백분율' 변수를 추가하세요.
+midwest <- midwest %>%
+            mutate(notadult=((poptotal-popadults)/poptotal)*100)
+
+##문제2. 미성년 인구 백분율이 가장 높은 상위 5개 county(지역)의 미성년 인구 백분율을 출력하세요.
+midwest %>%
+  group_by(county) %>%
+  arrange(desc(notadult)) %>%
+  select(county, notadult) %>%
+  head(5)
+
+##문제3. 분류표의 기준에 따라 미성년 비율 등급 변수를 추가하고, 각 등급에 몇 개의 지역이 있는지 알아보세요.
+midwest %>%
+  mutate(class
+         =ifelse(notadult>=40, "large", ifelse(notadult>=30, "middle", "small"))) %>%
+  group_by(class) %>%
+  summarise(n=n())
+###답안
+midwest <- midwest %>%
+  mutate(grade=ifelse(notadult>=40, "large",
+                      ifelse(notadult>=30, "middle", "small")))
+
+####미성년 비율 등급 빈도표
+table(midwest$grade)
+
+##문제4. popasian은 해당 지역의 아시아인 인구를 나타냅니다. '전체 인구 대비 아시아인 인구 백분율' 변수를 추가하고 하위 10개 지역의 state(주), county(지역), 아시아인 인구 백분율을 출력하세요.
+###답안
+midwest %>%
+  mutate(ratio_asian=(popasian/poptotal)*100) %>%
+  arrange(ratio_asian) %>%
+  select(state,county, ratio_asian) %>%
+  head(10)
